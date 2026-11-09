@@ -388,34 +388,30 @@ h2 {
   letter-spacing: 0;
 }
 
-/* ---------- Плёнка: едет справа налево при прокрутке (js/site.js) ---------- */
+/* ---------- Плёнка по кругу: едет при прокрутке, листается пальцем, мышью и стрелками (js/site.js) ---------- */
 .filmstrip {
   position: relative;
-  overflow: hidden;
   background: var(--ink);
-  padding: 30px 0 46px;
 }
+.filmstrip__view { position: relative; padding: 30px 0 46px; }
 .filmstrip__row {
   position: relative;
   display: flex;
   gap: 14px;
   width: max-content;
-  padding: 0 var(--gutter);
-  will-change: transform;
 }
-/* перфорация едет вместе с кадрами */
-.filmstrip__row::before,
-.filmstrip__row::after {
+/* перфорация на окне, js сдвигает её вместе с кадрами (--px), поэтому круг плёнки без шва */
+.filmstrip__view::before,
+.filmstrip__view::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   height: 10px;
-  background: repeating-linear-gradient(90deg, transparent 0 9px, var(--paper) 9px 23px, transparent 23px 34px);
-  border-radius: 2px;
+  background: linear-gradient(90deg, transparent 0 9px, var(--paper) 9px 23px, transparent 23px) var(--px, 0) 0 / 34px 10px repeat-x;
 }
-.filmstrip__row::before { top: -21px; }
-.filmstrip__row::after { bottom: -37px; }
+.filmstrip__view::before { top: 9px; }
+.filmstrip__view::after { bottom: 9px; }
 .filmstrip__frame { position: relative; flex: 0 0 auto; width: clamp(118px, 15vw, 212px); }
 .filmstrip__frame img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
 /* Факт между фото: титр немого кино, белое на чёрном в двойной рамке */
@@ -427,20 +423,13 @@ h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: .7em;
   padding: 10% 9%;
   border: 1px solid rgba(241, 236, 226, .55);
   outline: 1px solid rgba(241, 236, 226, .3);
   outline-offset: -6px;
   color: var(--paper);
-  font: italic 400 clamp(11px, 1.35vw, 18px)/1.3 var(--f-book);
+  font: italic 400 clamp(13px, 1.6vw, 21px)/1.3 var(--f-book);
   text-align: center;
-}
-.title-card small {
-  font: normal 400 clamp(8px, .75vw, 11px)/1.3 var(--f-type);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: rgba(241, 236, 226, .7);
 }
 .filmstrip__frame span {
   position: absolute;
@@ -487,12 +476,13 @@ h2 {
   align-items: center;
 }
 
-/* Откуда это: во всю ширину под сценарием */
+/* Мой бэкграунд: во всю ширину под сценарием, слева учёба, справа работа */
 .origin { margin-top: 72px; }
-.origin .bio {
+.origin__cols {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 56px;
+  align-items: start;
 }
 
 /* Страница сценария */
@@ -533,6 +523,17 @@ h2 {
   background: currentColor;
 }
 .script__text .list { font-size: 24px; }
+/* Как я пишу сценарии: номер, жирная мысль, пояснение */
+.how { list-style: none; margin: 0 0 8px; padding: 0; counter-reset: how; }
+.how li {
+  position: relative;
+  padding: 14px 0 14px 46px;
+  border-top: 1px solid var(--line-light);
+  color: rgba(241, 236, 226, .78);
+  counter-increment: how;
+}
+.how li::before { content: counter(how); position: absolute; left: 0; top: 16px; font: 600 28px/1 var(--f-cover); color: var(--paper); }
+.how b { display: block; margin-bottom: 2px; font-size: 22px; line-height: 1.25; color: var(--paper); }
 .tags.tags--light li { border-color: rgba(241, 236, 226, .7); font-size: 13px; }
 .script__text .tags { margin-bottom: 30px; }
 .script__quote {
@@ -804,19 +805,31 @@ h2 {
   box-shadow: inset 0 0 0 7px var(--ink), inset 0 0 0 8px rgba(241, 236, 226, .5);
 }
 .player--wide .player__box { aspect-ratio: 16 / 9; }
-.player__box iframe {
+.player__box iframe,
+.player__box video {
   display: block;
   width: 100%;
   height: 100%;
   border: 0;
   background: #000;
 }
+.player__box video { object-fit: cover; }
 .player figcaption {
   margin-top: 10px;
   font: 400 11px/1.35 var(--f-type);
   letter-spacing: .07em;
   text-transform: uppercase;
   color: var(--ink-2);
+}
+.player figcaption a { color: var(--ink); text-underline-offset: .2em; }
+.player figcaption a:hover { text-decoration-thickness: 2px; }
+/* Пять вертикальных клипов «Колокола» в ряд */
+.players--five {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  margin: 34px 0 8px;
 }
 
 /* ---------- Магниты на холодильнике ---------- */
@@ -947,19 +960,6 @@ h2 {
 .steps h3 { margin: 0 0 6px; font: 700 26px/1.2 var(--f-book); }
 .steps p { margin: 0; color: var(--ink-2); }
 
-.team {
-  max-width: 940px;
-  margin-top: 36px;
-  padding: 26px 30px;
-  border: 2px solid var(--ink);
-}
-.team__label {
-  margin: 0 0 8px;
-  font: 400 13px/1.4 var(--f-type);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.team p:last-child { margin: 0; }
 
 /* ---------- Контактный лист ---------- */
 /* Две плёнки во всю ширину экрана, под углом друг к другу; едут при прокрутке навстречу (js/site.js) */
@@ -971,6 +971,7 @@ h2 {
   overflow: hidden;
 }
 .strip {
+  position: relative;
   width: 112vw;
   margin-left: -6vw;
   background: var(--ink);
@@ -979,8 +980,143 @@ h2 {
 }
 .strip--a { transform: rotate(-2.5deg); }
 .strip--b { transform: rotate(2deg); margin-top: 34px; }
-.strip__row { display: flex; width: max-content; will-change: transform; }
+.strip__row { position: relative; display: flex; width: max-content; }
+
+/* Плёнки по кругу (js/site.js): ряд двигает js, вбок тянет палец или мышь, вверх-вниз листается страница */
+.filmstrip__view,
+.strip__view,
+.lb__view {
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.filmstrip__row,
+.strip__row,
+.lb__row { will-change: transform; }
+.filmstrip__frame,
+.strip .frame { cursor: zoom-in; }
+.is-dragging,
+.is-dragging .filmstrip__frame,
+.is-dragging .frame { cursor: grabbing; }
+.filmstrip img,
+.strip img,
+.lb img { -webkit-user-drag: none; }
+
+/* Стрелки по краям (только там, где есть мышь) */
+.pan {
+  display: none;
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  margin-top: -23px;
+  padding: 0;
+  border: 1.5px solid var(--paper);
+  border-radius: 50%;
+  background: rgba(18, 17, 16, .78);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background-color .15s, color .15s, opacity .2s;
+}
+.pan svg { display: block; width: 20px; height: 20px; margin: auto; }
+.pan:hover { background: var(--paper); color: var(--ink); }
+.pan--prev { left: 14px; }
+.pan--next { right: 14px; }
+.strip .pan--prev { left: calc(6vw + 14px); }
+.strip .pan--next { right: calc(6vw + 14px); }
+.filmstrip .pan { margin-top: -31px; } /* по центру кадров, не всей плёнки с номерами */
+@media (hover: hover) and (pointer: fine) {
+  .pan { display: block; }
+}
 .strip .frame { flex: 0 0 auto; width: clamp(150px, 17vw, 230px); }
+
+/* ---------- Кадры крупно: та же плёнка, большая, по кругу (js/site.js) ---------- */
+html.lb-open { overflow: hidden; }
+.lb {
+  --fw: min(calc((100vh - 250px) * .75), calc(100vw - 72px), 480px);
+  position: fixed;
+  inset: 0;
+  z-index: 98; /* под зерном, оно ложится и на плёнку */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(8, 7, 6, .95);
+  color: var(--paper);
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+@supports (height: 100svh) {
+  .lb { --fw: min(calc((100svh - 250px) * .75), calc(100vw - 72px), 480px); }
+}
+.lb[hidden] { display: none; }
+.lb__film { position: relative; }
+.lb__view {
+  position: relative;
+  padding: 40px 0 52px;
+  background: #000;
+  touch-action: none;
+}
+.lb__view::before,
+.lb__view::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(90deg, transparent 0 12px, var(--paper) 12px 30px, transparent 30px) var(--px, 0) 0 / 44px 14px repeat-x;
+}
+.lb__view::before { top: 13px; }
+.lb__view::after { bottom: 13px; }
+.lb__row { position: relative; display: flex; gap: 18px; width: max-content; }
+.lb__frame {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--fw);
+  aspect-ratio: 3 / 4;
+  background: #000;
+  opacity: .4;
+  transition: opacity .3s;
+}
+.lb__frame.is-on { opacity: 1; }
+.lb__frame img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.lb__frame .title-card { font-size: clamp(22px, calc(var(--fw) / 13), 34px); outline-offset: -10px; }
+.lb__no {
+  position: absolute;
+  left: 4px;
+  bottom: -27px;
+  font: 400 12px/1 var(--f-type);
+  letter-spacing: .1em;
+  color: rgba(241, 236, 226, .6);
+}
+.lb__cap {
+  min-height: 1.4em;
+  margin: 18px 0 0;
+  padding: 0 16px;
+  font: 400 13px/1.4 var(--f-type);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(241, 236, 226, .8);
+}
+.lb__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1.5px solid var(--paper);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+}
+.lb__close svg { display: block; width: 18px; height: 18px; margin: auto; }
+.lb__close:hover { background: var(--paper); color: var(--ink); }
+.lb .pan { margin-top: -29px; }
 .frame {
   position: relative;
   margin: 0;
@@ -1136,7 +1272,7 @@ h2 {
   .hero__photo { justify-self: center; max-width: 420px; }
   .script { grid-template-columns: minmax(0, 1fr); gap: 56px; }
   .origin { margin-top: 56px; }
-  .origin .bio { grid-template-columns: minmax(0, 1fr); }
+  .origin__cols { grid-template-columns: minmax(0, 1fr); }
   .page { max-width: 640px; }
   .case--main { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .case__photo { max-width: 460px; }
@@ -1167,10 +1303,8 @@ h2 {
   .hero__photo { max-width: 330px; }
   .sticker { left: -10px; top: 22px; width: 122px; height: 122px; padding: 12px; font-size: 9.5px; }
   .sticker b { font-size: 20px; }
-  .filmstrip { padding: 26px 0 42px; }
-  .filmstrip__row { gap: 8px; padding: 0 12px; }
-  .filmstrip__row::before { top: -17px; }
-  .filmstrip__row::after { bottom: -33px; }
+  .filmstrip__view { padding: 26px 0 42px; }
+  .filmstrip__row { gap: 8px; }
   .toc__row { flex-wrap: wrap; }
   .toc__title { flex: 1 1 100%; font-size: 22px; }
   .toc__dots { transform: translateY(-4px); }
@@ -1218,7 +1352,11 @@ h2 {
   .steps li { grid-template-columns: 52px minmax(0, 1fr); gap: 14px; padding: 20px 0; }
   .steps__n { font-size: 36px; }
   .steps h3 { font-size: 22px; }
-  .team { padding: 20px 18px; }
+  .how b { font-size: 20px; }
+  .how li { padding-left: 36px; font-size: 17px; }
+  .how li::before { font-size: 24px; }
+  .players--five { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 26px; }
+  .players--five .player:last-child { grid-column: 1 / -1; justify-self: center; width: calc(50% - 6px); }
   .strips { padding: 28px 0 44px; }
   .strip .frame { width: 138px; }
   .strip--b { margin-top: 22px; }
@@ -1236,7 +1374,7 @@ h2 {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .btn, .clip, .magnet { transition: none; }
-  .filmstrip, .strip { overflow-x: auto; }
+  .pan { transition: none; }
   /* фото не крутится, оборот просто проявляется */
   .flip__in, .flip.is-flipped .flip__in { transform: none; transition: none; }
   .flip__back { transform: none; opacity: 0; transition: opacity .3s; }

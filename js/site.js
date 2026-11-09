@@ -1,6 +1,7 @@
 /* Софья Харитонова · живые вещи на странице:
-   1) плёнки едут, пока страницу листают: под первым экраном справа налево,
-      две в «Кадрах» навстречу друг другу;
+   1) плёнки идут по кругу и едут, пока страницу листают: под первым экраном справа налево,
+      две в «Кадрах» навстречу друг другу; их можно листать вбок пальцем, мышью и стрелками,
+      кадр по нажатию открывается крупно на большой плёнке, она тоже листается по кругу;
    2) вкладки сверху показывают, в каком разделе читатель;
    3) превью роликов играют без звука, пока карточка на экране;
    4) магниты в «Кейсах» можно двигать мышью и пальцем;
@@ -12,46 +13,326 @@
 (function () {
   var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Плёнки ---------- */
-  // dir -1: лента едет справа налево, 1: слева направо
-  var drift = function (box, row, dir) {
-    var target = 0, current = 0, running = false;
+  /* ---------- Плёнки по кругу ---------- */
+  // Кадры в ряду повторены несколько раз. Позиция x любая, на экран попадает x по модулю длины одного круга,
+  // поэтому лента листается без конца в обе стороны.
+  // box: вся плёнка (в ней стрелки), view: окно, row: ряд кадров. Настройки o:
+  // dir: куда лента едет при прокрутке страницы (-1 справа налево, 1 слева направо, 0 стоит);
+  // step(): шаг, на который лента встаёт (крупный просмотр); lead(): сдвиг, чтобы текущий кадр был по центру;
+  // nudge(): на сколько листают стрелки; tap(i, el): нажали на кадр; wheel(d): своё колесо; moved(x): после отрисовки.
+  var mod = function (a, b) { return ((a % b) + b) % b; };
 
-    // Доля пути плёнки через экран: 0, когда она появилась снизу, 1, когда ушла вверх
-    var measure = function () {
-      var r = box.getBoundingClientRect();
-      var vh = window.innerHeight;
-      var p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
-      var max = Math.max(0, row.scrollWidth - box.clientWidth);
-      target = -(dir < 0 ? p : 1 - p) * max;
+  var tape = function (box, view, row, o) {
+    var originals = Array.prototype.slice.call(row.children);
+    var n = originals.length;
+    var W = 0, sets = 1;
+    originals.forEach(function (f, i) { f.setAttribute('data-i', i); });
+
+    var addSet = function () {
+      originals.forEach(function (f) {
+        var c = f.cloneNode(true);
+        c.setAttribute('aria-hidden', 'true');
+        row.appendChild(c);
+      });
+      sets++;
+    };
+    // Повторов столько, чтобы окно всегда было заполнено и слева, и справа
+    var fill = function () {
+      if (sets < 2) addSet();
+      W = row.children[n].offsetLeft - row.children[0].offsetLeft;
+      if (W <= 0) return;
+      var need = 2 + Math.ceil(view.clientWidth / W);
+      while (sets < need) addSet();
     };
 
-    // Плавно догоняем цель, чтобы рывки колеса мыши не дёргали ленту
-    var step = function () {
-      current += (target - current) * 0.14;
-      if (Math.abs(target - current) < 0.4) current = target;
-      row.style.transform = 'translate3d(' + current.toFixed(1) + 'px,0,0)';
-      if (current !== target) requestAnimationFrame(step);
-      else running = false;
+    var x = 0, offset = 0, v = 0, held = false, running = false, last = 0;
+    var base = function () { return 0; };
+    if (o.dir && !calm) {
+      // Доля пути плёнки через экран: 0, когда она появилась снизу, 1, когда ушла вверх
+      base = function () {
+        var r = box.getBoundingClientRect(), vh = window.innerHeight;
+        var p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+        return -o.dir * p * W * .5;
+      };
+    }
+    var target = function () { return base() + offset; };
+
+    var render = function () {
+      if (W <= 0) return;
+      var lead = o.lead ? o.lead() : 0;
+      row.style.transform = 'translate3d(' + (lead - W - mod(x, W)).toFixed(1) + 'px,0,0)';
+      if (o.moved) o.moved(x);
     };
 
-    var update = function () {
-      measure();
-      if (!running) { running = true; requestAnimationFrame(step); }
+    // Одна анимация на всё: лента догоняет цель (прокрутка страницы, стрелки) или катится по инерции после броска
+    var tick = function (t) {
+      var dt = last ? Math.min(48, t - last) : 16;
+      last = t;
+      if (held) { running = false; last = 0; return; }
+      if (v) {
+        offset += v * dt;
+        v *= Math.pow(.94, dt / 16);
+        if (Math.abs(v) < .02) v = 0;
+        x = target();
+      } else {
+        var goal = target();
+        x += (goal - x) * (calm ? 1 : .16);
+        if (Math.abs(goal - x) < .3) x = goal;
+      }
+      render();
+      if (v || x !== target()) requestAnimationFrame(tick);
+      else { running = false; last = 0; }
+    };
+    var kick = function () {
+      if (!running) { running = true; requestAnimationFrame(tick); }
     };
 
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    measure();
-    current = target;
-    row.style.transform = 'translate3d(' + current.toFixed(1) + 'px,0,0)';
+    /* Пальцем и мышью: тянем ленту, отпустили с разгона, она катится дальше */
+    var pid = null, sx = 0, sy = 0, sOff = 0, dragging = false, dragged = false, trail = [];
+    view.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 || pid !== null) return;
+      pid = e.pointerId;
+      sx = e.clientX;
+      sy = e.clientY;
+      held = true;
+      dragging = dragged = false;
+      v = 0;
+      offset = x - base(); // ловим ленту там, где она сейчас
+      sOff = offset;
+      trail = [[e.timeStamp, e.clientX]];
+    });
+    view.addEventListener('pointermove', function (e) {
+      if (e.pointerId !== pid) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!dragging) {
+        if (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy)) return;
+        dragging = true;
+        view.setPointerCapture(pid);
+        view.classList.add('is-dragging');
+      }
+      offset = sOff - dx;
+      x = target();
+      render();
+      trail.push([e.timeStamp, e.clientX]);
+      if (trail.length > 6) trail.shift();
+    });
+    var release = function (e) {
+      if (e.pointerId !== pid) return;
+      pid = null;
+      held = false;
+      view.classList.remove('is-dragging');
+      if (dragging) {
+        dragged = true;
+        var a = trail[0], b = trail[trail.length - 1];
+        var vel = b[0] > a[0] && e.timeStamp - b[0] < 80 ? -(b[1] - a[1]) / (b[0] - a[0]) : 0;
+        if (o.step) offset = snapAfter(vel);
+        else if (!calm) v = Math.max(-4, Math.min(4, vel));
+      }
+      dragging = false;
+      kick();
+    };
+    view.addEventListener('pointerup', release);
+    view.addEventListener('pointercancel', release);
+    view.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+    // Куда встать после броска: на соседний кадр, если тянули заметно или быстро
+    var snapAfter = function (vel) {
+      var s = o.step(), from = Math.round(sOff / s), moved = (offset - sOff) / s;
+      var k = Math.abs(moved) > .15 || Math.abs(vel) > .3
+        ? Math.sign(moved || vel) * Math.max(1, Math.round(Math.abs(moved))) : 0;
+      return (from + k) * s;
+    };
+
+    // Нажатие без протяжки: кадр
+    view.addEventListener('click', function (e) {
+      if (dragged) { dragged = false; return; }
+      var f = e.target.closest('[data-i]');
+      if (f && row.contains(f) && o.tap) o.tap(+f.getAttribute('data-i'), f);
+    });
+
+    // Тачпад вбок (или Shift + колесо) листает ленту, обычное колесо листает страницу
+    view.addEventListener('wheel', function (e) {
+      var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+      if (!d) return;
+      e.preventDefault();
+      if (e.deltaMode === 1) d *= 16;
+      if (o.wheel) { o.wheel(d); return; }
+      v = 0;
+      offset += d;
+      x = target();
+      render();
+    }, { passive: false });
+
+    /* Стрелки */
+    var go = function (d) {
+      v = 0;
+      if (o.step) { var s = o.step(); offset = (Math.round(offset / s) + d) * s; }
+      else offset += d * (o.nudge ? o.nudge() : view.clientWidth * .6);
+      kick();
+    };
+    var arrow = function (cls, label, points, d) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pan ' + cls;
+      b.setAttribute('aria-label', label);
+      b.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><polyline points="' + points + '" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+      b.addEventListener('click', function () { go(d); });
+      box.appendChild(b);
+    };
+    arrow('pan--prev', 'Листать назад', '12.5,4 6.5,10 12.5,16', -1);
+    arrow('pan--next', 'Листать вперёд', '7.5,4 13.5,10 7.5,16', 1);
+
+    var redo = function () { fill(); x = target(); render(); };
+    if (o.dir) window.addEventListener('scroll', kick, { passive: true });
+    window.addEventListener('resize', redo);
+    redo();
+
+    return {
+      go: go,
+      redo: redo,
+      // встать сразу на место (крупный просмотр открывается на нужном кадре)
+      jump: function (to) { v = 0; offset = to; redo(); }
+    };
   };
 
-  if (!calm) {
-    var strip = document.querySelector('.filmstrip');
-    if (strip) drift(strip, strip.querySelector('.filmstrip__row'), -1);
-    Array.prototype.forEach.call(document.querySelectorAll('.strip'), function (s) {
-      drift(s, s.querySelector('.strip__row'), s.classList.contains('strip--b') ? 1 : -1);
+  /* ---------- Кадры крупно: та же плёнка, только большая, тоже по кругу ---------- */
+  var album = function (frames) {
+    var lb = document.createElement('div');
+    lb.className = 'lb';
+    lb.hidden = true;
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.setAttribute('aria-label', 'Кадры крупно');
+    lb.innerHTML = '<div class="lb__film"><div class="lb__view"><div class="lb__row"></div></div></div>' +
+      '<p class="lb__cap" aria-live="polite"></p>' +
+      '<button class="lb__close" type="button" aria-label="Закрыть"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="2"/></svg></button>';
+    var film = lb.querySelector('.lb__film'), view = lb.querySelector('.lb__view'), row = lb.querySelector('.lb__row');
+    var cap = lb.querySelector('.lb__cap');
+
+    // Кадр плёнки на странице → кадр большой плёнки: фото или титр с фактом, номер кадра, подпись
+    var items = frames.map(function (f) {
+      var img = f.querySelector('img'), card = f.querySelector('.title-card');
+      var no = f.querySelector('.frame__no, .filmstrip__frame > span');
+      var fc = f.querySelector('figcaption');
+      var it = {
+        no: no ? no.textContent.trim() : '',
+        cap: fc ? fc.textContent.replace(no ? no.textContent : '', '').trim() : ''
+      };
+      var el = document.createElement('div');
+      el.className = 'lb__frame' + (card ? ' lb__frame--title' : '');
+      if (img) {
+        var big = document.createElement('img');
+        big.setAttribute('data-src', img.getAttribute('src'));
+        big.alt = img.alt;
+        big.width = img.width;
+        big.height = img.height;
+        el.appendChild(big);
+      } else if (card) {
+        el.appendChild(card.cloneNode(true));
+      }
+      var num = document.createElement('span');
+      num.className = 'lb__no';
+      num.textContent = it.no;
+      el.appendChild(num);
+      row.appendChild(el);
+      return it;
+    });
+    var n = items.length;
+    document.body.appendChild(lb);
+
+    var step = function () { return row.children[1].offsetLeft - row.children[0].offsetLeft; };
+    var fw = function () { return row.children[0].offsetWidth; };
+    var on = -1, lock = 0, acc = 0, back = null;
+
+    var api = tape(film, view, row, {
+      step: step,
+      lead: function () { return (view.clientWidth - fw()) / 2; },
+      moved: function (x) {
+        view.style.setProperty('--px', (-x).toFixed(1) + 'px');
+        var i = mod(Math.round(x / step()), n);
+        if (i === on) return;
+        on = i;
+        cap.textContent = items[i].cap ? items[i].no + ' · ' + items[i].cap : ''; // номер и так виден на плёнке
+        Array.prototype.forEach.call(row.children, function (el) {
+          var k = +el.getAttribute('data-i');
+          el.classList.toggle('is-on', k === i);
+          // грузим текущий кадр и по два с каждой стороны
+          if (Math.min(mod(k - i, n), mod(i - k, n)) <= 2) {
+            var im = el.querySelector('img[data-src]');
+            if (im) { im.src = im.getAttribute('data-src'); im.removeAttribute('data-src'); }
+          }
+        });
+      },
+      // нажали на соседний кадр: едем к нему
+      tap: function (i, el) {
+        var r = el.getBoundingClientRect(), mid = window.innerWidth / 2;
+        if (r.right < mid) api.go(-1);
+        else if (r.left > mid) api.go(1);
+      },
+      // колесо и тачпад: один кадр за жест
+      wheel: function (d) {
+        var now = Date.now();
+        if (now < lock) return;
+        acc += d;
+        if (Math.abs(acc) > 30) { api.go(acc > 0 ? 1 : -1); acc = 0; lock = now + 450; }
+      }
+    });
+
+    var close = function () {
+      lb.hidden = true;
+      document.documentElement.classList.remove('lb-open');
+      document.removeEventListener('keydown', keys);
+      if (back) back.focus({ preventScroll: true });
+    };
+    var keys = function (e) {
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') api.go(-1);
+      else if (e.key === 'ArrowRight') api.go(1);
+    };
+    lb.querySelector('.lb__close').addEventListener('click', close);
+    // нажатие мимо плёнки закрывает
+    lb.addEventListener('click', function (e) { if (e.target === lb || e.target === cap) close(); });
+
+    return function (i) {
+      back = document.activeElement;
+      lb.hidden = false;
+      document.documentElement.classList.add('lb-open');
+      document.addEventListener('keydown', keys);
+      on = -1;
+      api.jump(i * step());
+      lb.querySelector('.lb__close').focus({ preventScroll: true });
+    };
+  };
+
+  var filmstrip = document.querySelector('.filmstrip');
+  if (filmstrip) {
+    var fsView = filmstrip.querySelector('.filmstrip__view');
+    var fsRow = filmstrip.querySelector('.filmstrip__row');
+    var openAbout = album(Array.prototype.slice.call(fsRow.children));
+    tape(filmstrip, fsView, fsRow, {
+      dir: -1,
+      tap: function (i) { openAbout(i); },
+      moved: function (x) { fsView.style.setProperty('--px', (-x).toFixed(1) + 'px'); } // перфорация едет с кадрами
+    });
+  }
+
+  // Две цветные плёнки «Кадров»: крупно они одна плёнка из 16 кадров
+  var strips = document.querySelectorAll('.strip');
+  if (strips.length) {
+    var all = [];
+    Array.prototype.forEach.call(strips, function (s) {
+      all = all.concat(Array.prototype.slice.call(s.querySelectorAll('.strip__row > .frame')));
+    });
+    var openShots = album(all);
+    var shift = 0;
+    Array.prototype.forEach.call(strips, function (s) {
+      var row = s.querySelector('.strip__row'), from = shift;
+      shift += row.children.length;
+      tape(s, s.querySelector('.strip__view'), row, {
+        dir: s.classList.contains('strip--b') ? 1 : -1,
+        nudge: function () { return window.innerWidth * .6; },
+        tap: function (i) { openShots(from + i); }
+      });
     });
   }
 
