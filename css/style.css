@@ -156,7 +156,8 @@ h2 {
   line-height: .95;
   letter-spacing: -.005em;
   text-transform: uppercase;
-  margin-bottom: 22px;
+  /* 34px вместо 22px (20.11.2026): больше воздуха между крупным заголовком и текстом под ним */
+  margin-bottom: 34px;
 }
 
 .intro {
@@ -208,13 +209,15 @@ h2 {
   text-transform: uppercase;
 }
 .hero__name span { display: block; }
+/* Отступы первого экрана увеличены 20.11.2026 (было 18 / 22 / 30 / 26 px) */
 .hero__role {
-  margin: 18px 0 0;
+  margin: 30px 0 0;
   font-size: clamp(26px, 2.6vw, 34px);
   font-style: italic;
   line-height: 1.2;
 }
-.hero__lead { max-width: 30em; margin: 22px 0 0; font-size: 21px; }
+.hero__lead { max-width: 30em; margin: 30px 0 0; font-size: 21px; }
+.hero .buttons { margin: 38px 0 30px; }
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
@@ -788,14 +791,6 @@ h2 {
 .case__cols > .list { padding-top: 6px; }
 
 /* Плееры ВКонтакте в рамке, как карточки-титры */
-.players--row {
-  display: grid;
-  /* ширины 9:9:32, чтобы два вертикальных клипа и горизонтальное видео были одной высоты */
-  grid-template-columns: minmax(0, 81fr) minmax(0, 81fr) minmax(0, 256fr);
-  gap: 16px;
-  align-items: start;
-  margin: 34px 0 8px;
-}
 .player { margin: 0; }
 .player__box {
   position: relative;
@@ -823,14 +818,16 @@ h2 {
 }
 .player figcaption a { color: var(--ink); text-underline-offset: .2em; }
 .player figcaption a:hover { text-decoration-thickness: 2px; }
-/* Пять вертикальных клипов «Колокола» в ряд */
+/* Пять вертикальных клипов в ряд («Колокол», ERGONOVA) */
 .players--five {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  gap: 16px 16px;
   align-items: start;
   margin: 34px 0 8px;
 }
+/* Горизонтальное видео ERGONOVA под клипами: три средние колонки, по высоте выходит как клип (9:16 против 16:9) */
+.players--five .player--wide { grid-column: 2 / span 3; margin-top: 12px; }
 
 /* ---------- Магниты на холодильнике ---------- */
 .fridge { margin: 8px 0 64px; }
@@ -1233,7 +1230,7 @@ html.lb-open { overflow: hidden; }
 @keyframes credits-roll { to { transform: translateY(-50%); } }
 
 .cta { padding: 64px 0 8px; }
-.cta h2 { margin-bottom: 16px; }
+.cta h2 { margin-bottom: 24px; }
 .cta p { max-width: 30em; margin: 0 auto; font-size: 21px; color: rgba(241, 236, 226, .85); }
 .cta p + p { margin-top: 10px; }
 .finale .btn { border-color: var(--paper); color: var(--paper); }
@@ -1297,7 +1294,10 @@ html.lb-open { overflow: hidden; }
   .intro { font-size: 19px; margin-bottom: 30px; }
   .hero { padding-top: 16px; padding-bottom: 48px; }
   .hero__name { font-size: 16.5vw; }
-  .hero__lead { font-size: 19px; }
+  h2 { margin-bottom: 28px; }
+  .hero__role { margin-top: 24px; }
+  .hero__lead { margin-top: 26px; font-size: 19px; }
+  .hero .buttons { margin: 32px 0 28px; }
   .buttons { flex-direction: column; gap: 12px; }
   .btn { width: 100%; min-height: 60px; font-size: 14px; padding: 0 16px; }
   .hero__photo { max-width: 330px; }
@@ -1330,8 +1330,6 @@ html.lb-open { overflow: hidden; }
   .clips--four { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .clip { padding: 14px 8px 10px; aspect-ratio: auto; min-height: 230px; }
   .clips--four .clip { aspect-ratio: 9 / 16; min-height: 0; }
-  .players--row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 26px; }
-  .player--wide { grid-column: 1 / -1; }
   .player figcaption { font-size: 10px; letter-spacing: .05em; }
   .fridge { margin-bottom: 48px; }
   .fridge__board { gap: 18px 16px; padding: 26px 0 20px; }
@@ -1356,7 +1354,8 @@ html.lb-open { overflow: hidden; }
   .how li { padding-left: 36px; font-size: 17px; }
   .how li::before { font-size: 24px; }
   .players--five { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 26px; }
-  .players--five .player:last-child { grid-column: 1 / -1; justify-self: center; width: calc(50% - 6px); }
+  .players--five .player:nth-child(5) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 6px); }
+  .players--five .player--wide { grid-column: 1 / -1; margin-top: 4px; }
   .strips { padding: 28px 0 44px; }
   .strip .frame { width: 138px; }
   .strip--b { margin-top: 22px; }
