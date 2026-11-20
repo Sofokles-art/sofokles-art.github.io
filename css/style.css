@@ -2,6 +2,191 @@
    Чёрно-белый: тёплая бумага и глубокий чёрный. Шрифты:
    Oswald (обложка), Old Standard TT (книга), PT Mono (сценарий). */
 
+/* Шрифты лежат на сайте (fonts/), те же файлы и наборы знаков, что отдаёт Google Fonts; лицензия SIL OFL */
+/* Шрифты лежат на самом сайте (папка fonts/), раньше брались с fonts.googleapis.com.
+   Old Standard TT, Oswald, PT Mono: лицензия SIL Open Font License 1.1, раздавать со своего сайта можно.
+   Наборы: cyrillic-ext, cyrillic, latin-ext, latin; браузер качает только нужные по unicode-range. */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-italic-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-italic-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-italic-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-italic-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-700-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-700-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Old Standard TT';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(../fonts/old-standard-tt-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(../fonts/oswald-600-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(../fonts/oswald-600-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(../fonts/oswald-600-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(../fonts/oswald-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/pt-mono-400-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/pt-mono-400-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/pt-mono-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/pt-mono-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --paper: #f1ece2;
   --paper-2: #f8f5ee;
@@ -128,11 +313,16 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   transform: perspective(14px) rotateX(1.4deg);
   transform-origin: bottom;
 }
+.tab::after { content: ""; position: absolute; inset: -3px 0 -2px; }
 .tab:hover { color: var(--ink); }
 .tab.is-on { z-index: 3; padding-top: 13px; color: var(--ink); }
 .tab.is-on::before { inset: 0; background: var(--paper); }
 
 main[id], section[id] { scroll-margin-top: 52px; }
+/* «Написать» ведёт к кнопкам финала. Низ финала не поднимается выше низа окна, поэтому ирис не начинается:
+   680 = от верха .cta до низа .finale (около 712 px) минус запас; если в финал добавят строки, пересчитать */
+#napisat { scroll-margin-top: max(120px, calc(100vh - 680px)); }
+.nw { white-space: nowrap; } /* «Абу-Даби» в подписях не рвётся по дефису */
 
 /* ---------- Строка сценария (заголовок сцены) ---------- */
 .slug {
@@ -217,7 +407,9 @@ h2 {
   line-height: 1.2;
 }
 .hero__lead { max-width: 30em; margin: 30px 0 0; font-size: 21px; }
-.hero .buttons { margin: 38px 0 30px; }
+.hero .buttons { margin: 38px 0 24px; }
+.hero__start { max-width: 30em; margin: 0 0 18px; font-size: 18px; color: var(--ink-2); }
+.hero__start a { color: var(--ink); text-underline-offset: .2em; }
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
@@ -461,6 +653,10 @@ h2 {
   white-space: nowrap;
 }
 .toc p { margin: 6px 0 0; max-width: 40em; font-style: italic; color: var(--ink-2); }
+/* Строка связи после цен */
+.ask { max-width: 940px; margin: 30px 0 0; font-size: 21px; }
+.ask a { color: var(--ink); text-underline-offset: .2em; white-space: nowrap; }
+.ask a:hover { text-decoration-thickness: 2px; }
 
 /* ---------- Тёмная сцена: сценарии ---------- */
 .scene--dark {
@@ -1283,12 +1479,23 @@ html.lb-open { overflow: hidden; }
 @media (max-width: 600px) {
   :root { --gutter: 16px; }
   body { font-size: 18px; }
-  .top { padding-top: 14px; padding-bottom: 14px; font-size: 12px; }
+  /* шапка: обе ссылки 44 px под палец, поля меньше, поэтому шапка не выше прежнего */
+  .top { padding-top: 10px; padding-bottom: 10px; font-size: 12px; }
+  .top__name, .top__cta { display: inline-flex; align-items: center; min-height: 44px; }
   .top__cta { padding: 10px 14px; }
-  .tabs__in { padding: 6px 12px 0; }
-  .tab { margin-right: -4px; padding: 8px 10px; font-size: 10px; letter-spacing: .05em; }
-  .tab.is-on { padding-top: 11px; }
-  main[id], section[id] { scroll-margin-top: 44px; }
+  /* вкладки на всю ширину: все шесть влезают от 320 px, высота нажатия около 40 px */
+  .tabs__in { padding: 6px 8px 0; }
+  .tab { flex: 1 0 auto; text-align: center; margin-right: -4px; padding: 13px 5px; font-size: 11px; letter-spacing: .02em; }
+  .tab.is-on { padding-top: 16px; }
+  main[id], section[id] { scroll-margin-top: 54px; }
+  /* ссылки в подписях и прайсе: поле нажатия выше и ниже текста, строки не сдвигаются */
+  .player figcaption a, .toc a, .reels__more a, .hero__start a { padding-block: 15px; }
+  .ask { font-size: 19px; }
+  /* на телефоне две ссылки строка под строкой, без точки между ними */
+  .ask__dot { display: none; }
+  .ask a { display: block; width: max-content; padding-block: 9px; }
+  .ask a:first-of-type { margin-top: 6px; }
+  .hero__start { font-size: 17px; }
   .slug { font-size: 12px; gap: 10px; }
   .scene { padding-top: 72px; }
   .intro { font-size: 19px; margin-bottom: 30px; }
@@ -1297,11 +1504,11 @@ html.lb-open { overflow: hidden; }
   h2 { margin-bottom: 28px; }
   .hero__role { margin-top: 24px; }
   .hero__lead { margin-top: 26px; font-size: 19px; }
-  .hero .buttons { margin: 32px 0 28px; }
+  .hero .buttons { margin: 32px 0 22px; }
   .buttons { flex-direction: column; gap: 12px; }
   .btn { width: 100%; min-height: 60px; font-size: 14px; padding: 0 16px; }
   .hero__photo { max-width: 330px; }
-  .sticker { left: -10px; top: 22px; width: 122px; height: 122px; padding: 12px; font-size: 9.5px; }
+  .sticker { left: -10px; top: 22px; width: 132px; height: 132px; padding: 12px; font-size: 11px; }
   .sticker b { font-size: 20px; }
   .filmstrip__view { padding: 26px 0 42px; }
   .filmstrip__row { gap: 8px; }
@@ -1324,13 +1531,13 @@ html.lb-open { overflow: hidden; }
   .snaps, .snaps + .snaps { grid-template-columns: minmax(0, 1fr); gap: 34px; }
   .reels-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 12px; }
   .reel__t { font-size: 16px; }
-  .reel__m, .reel__acc { font-size: 10.5px; }
-  .reel__fmt { font-size: 9.5px; padding: 4px 6px 3px; left: 6px; top: 6px; }
+  .reel__m, .reel__acc { font-size: 12px; }
+  .reel__fmt { font-size: 11px; padding: 4px 6px 3px; left: 6px; top: 6px; }
   .clips { gap: 8px; }
   .clips--four { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .clip { padding: 14px 8px 10px; aspect-ratio: auto; min-height: 230px; }
   .clips--four .clip { aspect-ratio: 9 / 16; min-height: 0; }
-  .player figcaption { font-size: 10px; letter-spacing: .05em; }
+  .player figcaption { font-size: 12px; letter-spacing: .03em; }
   .fridge { margin-bottom: 48px; }
   .fridge__board { gap: 18px 16px; padding: 26px 0 20px; }
   .magnet { min-height: 60px; padding: 11px 15px; font-size: 18px; }
@@ -1360,14 +1567,22 @@ html.lb-open { overflow: hidden; }
   .strip .frame { width: 138px; }
   .strip--b { margin-top: 22px; }
   .frame { padding: 24px 6px 34px; }
-  .frame figcaption { font-size: 10px; }
+  .frame figcaption { font-size: 12px; letter-spacing: .03em; }
+  .print--small figcaption { font-size: 12px; }
   .finale { margin-top: 80px; padding-top: 64px; }
   .credits__list div { gap: 14px; }
-  .credits__list dt { font-size: 11px; letter-spacing: .08em; line-height: 2.2; }
+  .credits__list dt { font-size: 12px; letter-spacing: .08em; line-height: 2.2; }
   .credits__list dd { font-size: 18px; }
   .the-end { margin: 56px 0 40px; }
   .outro__room { height: 170vh; }
   .credits__roll.is-rolling { height: 160px; }
+}
+
+/* узкие телефоны (360 px): подписи клипов в две строки, ряд ровный */
+@media (max-width: 370px) {
+  .player figcaption { letter-spacing: .01em; }
+  /* на 360 px название аккаунта «noimann.architecture» вылезало из карточки на 8 px */
+  .reel__acc { font-size: 11px; letter-spacing: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

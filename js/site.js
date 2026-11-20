@@ -26,13 +26,29 @@
     var originals = Array.prototype.slice.call(row.children);
     var n = originals.length;
     var W = 0, sets = 1;
-    originals.forEach(function (f, i) { f.setAttribute('data-i', i); });
+    // label(f, i): плёнка страницы, её кадры открываются и с клавиатуры (Tab, потом Enter или пробел)
+    var keyed = !!(o.label && o.tap);
+    // ряд стоит так, что кадры-оригиналы в окне, а не левее его: туда приходит фокус с клавиатуры
+    var pre = keyed ? 0 : 1;
+    originals.forEach(function (f, i) {
+      f.setAttribute('data-i', i);
+      if (keyed) {
+        f.tabIndex = 0;
+        f.setAttribute('role', 'button');
+        f.setAttribute('aria-label', o.label(f, i));
+      }
+    });
 
+    // Копия собирается из разметки целиком, поэтому loading="lazy" у фото действует и в копиях
+    // (cloneNode копирует атрибуты по одному, и фото с src раньше loading начинает грузиться сразу)
     var addSet = function () {
       originals.forEach(function (f) {
-        var c = f.cloneNode(true);
+        row.insertAdjacentHTML('beforeend', f.outerHTML);
+        var c = row.lastElementChild;
         c.setAttribute('aria-hidden', 'true');
-        row.appendChild(c);
+        c.removeAttribute('tabindex');
+        c.removeAttribute('role');
+        c.removeAttribute('aria-label');
       });
       sets++;
     };
@@ -55,12 +71,22 @@
         return -o.dir * p * W * .5;
       };
     }
-    var target = function () { return base() + offset; };
+    // pinned: пока кадр в фокусе с клавиатуры, лента стоит так, чтобы он был в окне (сдвиг по модулю круга),
+    // и не едет с прокруткой страницы; unpin() отпускает её с того же места
+    var pinned = -1;
+    var target = function () {
+      return pinned >= 0 ? x + mod(pinned - x + W / 2, W) - W / 2 : base() + offset;
+    };
+    var unpin = function () {
+      if (pinned < 0) return;
+      pinned = -1;
+      offset = x - base();
+    };
 
     var render = function () {
       if (W <= 0) return;
       var lead = o.lead ? o.lead() : 0;
-      row.style.transform = 'translate3d(' + (lead - W - mod(x, W)).toFixed(1) + 'px,0,0)';
+      row.style.transform = 'translate3d(' + (lead - pre * W - mod(x, W)).toFixed(1) + 'px,0,0)';
       if (o.moved) o.moved(x);
     };
 
@@ -91,6 +117,7 @@
     var pid = null, sx = 0, sy = 0, sOff = 0, dragging = false, dragged = false, trail = [];
     view.addEventListener('pointerdown', function (e) {
       if (e.button !== 0 || pid !== null) return;
+      unpin();
       pid = e.pointerId;
       sx = e.clientX;
       sy = e.clientY;
@@ -157,6 +184,7 @@
       e.preventDefault();
       if (e.deltaMode === 1) d *= 16;
       if (o.wheel) { o.wheel(d); return; }
+      unpin();
       v = 0;
       offset += d;
       x = target();
@@ -165,6 +193,7 @@
 
     /* Стрелки */
     var go = function (d) {
+      unpin();
       v = 0;
       if (o.step) { var s = o.step(); offset = (Math.round(offset / s) + d) * s; }
       else offset += d * (o.nudge ? o.nudge() : view.clientWidth * .6);
@@ -181,6 +210,38 @@
     };
     arrow('pan--prev', 'Листать назад', '12.5,4 6.5,10 12.5,16', -1);
     arrow('pan--next', 'Листать вперёд', '7.5,4 13.5,10 7.5,16', 1);
+
+    /* Клавиатура: Enter открывает кадр сразу, пробел на отпускании (иначе он нажмёт «Закрыть» в окне) */
+    if (keyed) {
+      var mine = function (el) { return originals.indexOf(el) >= 0; };
+      row.addEventListener('keydown', function (e) {
+        if (!mine(e.target)) return;
+        if (e.key === 'Enter') { e.preventDefault(); o.tap(+e.target.getAttribute('data-i'), e.target); }
+        else if (e.key === ' ') e.preventDefault();
+      });
+      row.addEventListener('keyup', function (e) {
+        if (e.key === ' ' && mine(e.target)) o.tap(+e.target.getAttribute('data-i'), e.target);
+      });
+      // браузер сам прокручивает окно к кадру в фокусе, а лента двигается через transform: прокрутку снимаем
+      view.addEventListener('scroll', function () { if (view.scrollLeft) view.scrollLeft = 0; });
+      // кадр в фокусе подвозим в окно (по кругу коротким путём), если он у края или за ним, и держим там
+      row.addEventListener('focusin', function (e) {
+        var f = e.target;
+        if (!mine(f)) return;
+        requestAnimationFrame(function () {
+          view.scrollLeft = 0;
+          if (W <= 0 || document.activeElement !== f) return;
+          var vw = view.clientWidth, fw = f.offsetWidth, pad = Math.max(0, Math.min(48, (vw - fw) / 2));
+          var m = mod(x, W);
+          var c = f.getBoundingClientRect().left - view.getBoundingClientRect().left + m; // место кадра при сдвиге 0
+          var at = c - m;
+          v = 0;
+          pinned = at >= pad && at + fw <= vw - pad ? m : Math.min(W - 1, Math.max(0, c - (vw - fw) / 2));
+          kick();
+        });
+      });
+      row.addEventListener('focusout', function (e) { if (mine(e.target)) unpin(); });
+    }
 
     var redo = function () { fill(); x = target(); render(); };
     if (o.dir) window.addEventListener('scroll', kick, { passive: true });
@@ -278,8 +339,13 @@
       }
     });
 
+    // пока окно открыто, страница за ним недоступна: фокус и читалка остаются в окне
+    var behind = function (on) {
+      Array.prototype.forEach.call(document.querySelectorAll('main, .top, .tabs'), function (e) { e.inert = on; });
+    };
     var close = function () {
       lb.hidden = true;
+      behind(false);
       document.documentElement.classList.remove('lb-open');
       document.removeEventListener('keydown', keys);
       if (back) back.focus({ preventScroll: true });
@@ -296,6 +362,7 @@
     return function (i) {
       back = document.activeElement;
       lb.hidden = false;
+      behind(true);
       document.documentElement.classList.add('lb-open');
       document.addEventListener('keydown', keys);
       on = -1;
@@ -312,6 +379,10 @@
     tape(filmstrip, fsView, fsRow, {
       dir: -1,
       tap: function (i) { openAbout(i); },
+      label: function (f) {
+        var t = f.querySelector('.title-card'), no = f.querySelector('.filmstrip__frame > span');
+        return t ? 'Открыть крупно: ' + t.textContent.trim() : 'Открыть кадр ' + (no ? no.textContent.trim() : '') + ' крупно';
+      },
       moved: function (x) { fsView.style.setProperty('--px', (-x).toFixed(1) + 'px'); } // перфорация едет с кадрами
     });
   }
@@ -331,9 +402,42 @@
       tape(s, s.querySelector('.strip__view'), row, {
         dir: s.classList.contains('strip--b') ? 1 : -1,
         nudge: function () { return window.innerWidth * .6; },
-        tap: function (i) { openShots(from + i); }
+        tap: function (i) { openShots(from + i); },
+        label: function (f) {
+          var fc = f.querySelector('figcaption'), no = f.querySelector('.frame__no');
+          return 'Открыть крупно: ' + (fc ? fc.textContent.replace(no ? no.textContent : '', '').trim() : '');
+        }
       });
     });
+
+    /* Фото «Кадров» заранее: они далеко внизу и грузятся лениво. Чтобы к приходу читателя они уже были
+       и ничего не дёргалось, после загрузки страницы в простое тянем их в кеш по одному, с низким приоритетом.
+       При экономии трафика не тянем. */
+    var warmList = [];
+    Array.prototype.forEach.call(document.querySelectorAll('.strip img'), function (im) {
+      var s = im.getAttribute('src');
+      if (s && warmList.indexOf(s) < 0) warmList.push(s);
+    });
+    var conn = navigator.connection;
+    if (warmList.length && !(conn && conn.saveData)) {
+      var warmKept = []; // ссылки держим, чтобы фото остались в памяти страницы и второй раз не качались
+      var whenIdle = window.requestIdleCallback
+        ? function (fn) { window.requestIdleCallback(fn, { timeout: 3000 }); }
+        : function (fn) { setTimeout(fn, 300); };
+      var warmNext = function () {
+        var s = warmList.shift();
+        if (!s) return;
+        var im = new Image();
+        im.decoding = 'async';
+        im.fetchPriority = 'low';
+        im.onload = im.onerror = function () { whenIdle(warmNext); };
+        im.src = s;
+        warmKept.push(im);
+      };
+      var warmStart = function () { whenIdle(warmNext); };
+      if (document.readyState === 'complete') warmStart();
+      else window.addEventListener('load', warmStart);
+    }
   }
 
   /* ---------- Вкладки: выдвигаем вкладку раздела, который сейчас на экране ---------- */
@@ -341,8 +445,9 @@
   var tabs = document.querySelectorAll('.tab');
 
   if (bar && tabs.length) {
+    // data-spy: раздел для подсветки, если вкладка ведёт не к его началу («Контакты» ведут сразу к кнопкам)
     var parts = Array.prototype.map.call(tabs, function (t) {
-      return document.querySelector(t.getAttribute('href'));
+      return document.querySelector(t.getAttribute('data-spy') || t.getAttribute('href'));
     });
     var on = 0, queued = false;
 
